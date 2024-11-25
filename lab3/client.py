@@ -2,7 +2,6 @@ import asyncio
 import tkinter as tk
 from tkinter import scrolledtext, simpledialog
 
-
 class Client:
     def __init__(self, root, loop):
         self.root = root
@@ -24,6 +23,10 @@ class Client:
 
     async def connect(self):
         self.reader, self.writer = await asyncio.open_connection("127.0.0.1", 8910)
+        #Get username from server
+        self.writer.write(self.name.encode() + b'\n')
+        await self.writer.drain()
+
 
         self.loop.create_task(self.start_receive())
 
@@ -38,21 +41,28 @@ class Client:
         message = self.entry.get()
         words = message.split()
 
-        if "/change_name" in words:
-            self.name = words[words.index("/change_name") + 1]
-
         if "/change_room" in words:
-            self.room = words[words.index("/change_room") + 1]
+            new_room = words[words.index("/change_room") + 1]
+            self.room = new_room
             print(f"new room {self.room}")
 
-        if message:
+        if "/pm" in words:
+            target = words[1]
+            msg = " ".join(words[2:])
+            self.writer.write(f"/pm {target} {msg}\n".encode()) #Send /pm command to server
+
+        elif message: # Send normal message only if it's not a command.
             self.writer.write(f"{self.name}: {message}\n".encode())
-            self.entry.delete(0, tk.END)
+    
+        self.entry.delete(0, tk.END)
 
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     root = tk.Tk()
+    T = tk.Text(root, height=5, width=52)
+    T.pack()
+    T.insert(tk.END, "* `/get_rooms` - print list of rooms\n* `/change_room [room] [password]` - join to [room]\n* `/pm [username] [message]` - send private message")
     client = Client(root, loop)
 
     async def tkUpdate():

@@ -3,16 +3,36 @@ import asyncio
 
 class Server:
     def __init__(self):
-        self.clients = set()
+        self.clients = {}
         self.rooms = {}
         self.passw = {}
-
+        self.user_data = {}
+    
+    def find_writer_by_username(self, username):
+        for writer, user_data in self.user_data.items():
+            if user_data['username'] == username:
+                return writer
+        return None
+    
     async def handle(self, reader, writer):
         addr = writer.get_extra_info("peername")
         print(f"Client connected {addr}")
         room_name = ""
+        username = None #Store username per client.
 
         try:
+            # Receive username from the client (assuming it's sent immediately after connecting)
+            username_data = await reader.readuntil(b'\n')  
+            username = username_data.strip().decode()
+
+            if not username:
+                writer.write(b"Username not received. Disconnecting.\n")
+                await writer.drain()
+                return #Disconnect if no username is received
+
+            self.user_data[writer] = {'username': username}
+            print(f"Client {username} ({addr}) connected.")
+
             while True:
                 data = await reader.read(100)
                 if not data:
@@ -56,23 +76,47 @@ class Server:
                             self.rooms[room_name].remove(writer)
 
                         await self.broadcast("user leaved room\n", writer, room_name)
-
+                        
                         room_name = new_room_name
                     else:
                         writer.write("Invalid password\n".encode())
                         await writer.drain()
+                    
+                    continue
 
+                if "/pm" in message.split():
+                    auth_data = message.split()
+                    if len(auth_data) < 3:
+                        writer.write(b"Usage: /pm <username> <message>\n")
+                        await writer.drain()
+                        continue
+
+                    target_username = auth_data[1]
+                    message_to_send = " ".join(auth_data[2:]) #Get the message part.
+
+                    target_writer = self.find_writer_by_username(target_username)
+                    if target_writer is None:
+                        writer.write(f"User '{target_username}' not found.\n".encode())
+                        await writer.drain()
+                        continue
+
+                    #Send PM. No need for a separate room in this implementation.
+                    target_writer.write(f"PM from {username}: {message_to_send}\n".encode())
+                    await target_writer.drain()
                     continue
 
                 await self.broadcast(message, writer, room_name)
 
         except Exception as e:
-            print(e)
+            print(f"Error handling client {addr}: {e}")
         finally:
             print(f"Client {addr} disconnected")
-            self.rooms[room_name].remove(writer)
+            if writer in self.user_data:
+                del self.user_data[writer] #Remove user data on disconnect.
+            if room_name: #Check if there was a room to remove the client from.
+                self.rooms.get(room_name, set()).discard(writer)  #Use discard to safely remove
             await self.broadcast(
-                f"CLinet {addr} leaved room {room_name}\n", writer, room_name
+                f"Client {username or addr} leaved room {room_name}\n", writer, room_name
             )
             writer.close()
             await writer.wait_closed()
