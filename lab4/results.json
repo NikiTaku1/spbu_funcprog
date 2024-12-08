@@ -1,0 +1,38 @@
+[
+    {
+        "title": "The Lost World",
+        "author": [
+            "Arthur Conan Doyle"
+        ],
+        "genre": "Science Fiction",
+        "year": 1900,
+        "score": 3
+    },
+    {
+        "title": "Alice's Adventures in Wonderland",
+        "author": [
+            "Lewis Carroll"
+        ],
+        "genre": "Science Fiction",
+        "year": 1865,
+        "score": 2
+    },
+    {
+        "title": "Frankenstein or The Modern Prometheus",
+        "author": [
+            "Mary Shelley"
+        ],
+        "genre": "Science Fiction",
+        "year": 1818,
+        "score": 2
+    },
+    {
+        "title": "The Time Machine",
+        "author": [
+            "H. G. Wells"
+        ],
+        "genre": "Science Fiction",
+        "year": 1895,
+        "score": 2
+    }
+]
