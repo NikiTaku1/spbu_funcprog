@@ -93,29 +93,53 @@ def preprocess_data(data_queue, preprocessed_data, stop_words):
             preprocessed_data.extend(tokens)
 
 
-def show_data(prefix, textarea, text):
+def show_data(prefix, textarea, text, stop_words):
   words_and_abbreviations = {}
   words = re.findall(r'\b[а-яё]+\b', text.lower())
   for word in words:
-    if len(word) >= 4: 
+    if (len(word) >= 4) and (len(word) <= 12) and (word not in stop_words): 
       if word in words_and_abbreviations:
         words_and_abbreviations[word] += 1
       else:
         words_and_abbreviations[word] = 1
-
+  
   sorted_words = sorted(words_and_abbreviations.items(), key=lambda item: item[1], reverse=True)
-  time.sleep(5)
-  textarea.delete(1.0, tk.END)
-  textarea.insert(tk.END, f"{prefix} words top 10:\n")
+#   textarea.delete(1.0, tk.END)
+  textarea.insert(tk.END, f"{prefix} words top:\n")
   for i in range(min(10, len(sorted_words))):
       word, count = sorted_words[i]
-      textarea.insert(tk.END, f"{word}: {count}\n")
-
-  textarea.insert(tk.END, "Finished")
+      textarea.insert(tk.END, f"{i+1}.")
+      textarea.insert(tk.END, f"{word}:{count}, ")
+  textarea.insert(tk.END, "\n")
+  textarea.insert(tk.END, "\n")
+  words_and_abbreviations = {}
+  words=[]
+  sorted_words=[]
 
 
 def vk_analyze(num_threads, num_vk_posts, stop_words):
-    vk_groups = entry_vk_groups.get()
+    vk_groups = entry_vk_groups.get().split(", ")
+    for i in range(len(vk_groups)):
+        if vk_groups[i] == 'bookflow':
+            show_data(vk_groups[i], result_text_vk, choice("vk\\vk_bookflow.html", "vk"), stop_words)
+        if vk_groups[i] == 'iapanoramaspbu':
+            show_data(vk_groups[i], result_text_vk, choice("vk\\vk_iapanoramaspbu.html", "vk"), stop_words)
+        if vk_groups[i] == 'lyandpy':
+            show_data(vk_groups[i], result_text_vk, choice("vk\\vk_lyandpy.html", "vk"), stop_words)
+        if vk_groups[i] == 'oproger':
+            show_data(vk_groups[i], result_text_vk, choice("vk\\vk_oproger.html", "vk"), stop_words)
+        if vk_groups[i] == 'overhearspbsu':
+            show_data(vk_groups[i], result_text_vk, choice("vk\\vk_overhearspbsu.html", "vk"), stop_words)
+        if vk_groups[i] == 'proglib':
+            show_data(vk_groups[i], result_text_vk, choice("vk\\vk_proglib.html", "vk"), stop_words)
+        if vk_groups[i] == 'punkovchanin':
+            show_data(vk_groups[i], result_text_vk, choice("vk\\vk_punkovchanin.html", "vk"), stop_words)
+        if vk_groups[i] == 'spb1724':
+            show_data(vk_groups[i], result_text_vk, choice("vk\\vk_spb1724.html", "vk"), stop_words)
+        if vk_groups[i] == 'sspmpu':
+            show_data(vk_groups[i], result_text_vk, choice("vk\\vk_sspmpu.html", "vk"), stop_words)
+        if vk_groups[i] == 'tproger':
+            show_data(vk_groups[i], result_text_vk, choice("vk\\vk_tproger.html", "vk"), stop_words)
 
     data_queue_vk = Queue()
     preprocessed_data_vk = []
@@ -142,13 +166,33 @@ def vk_analyze(num_threads, num_vk_posts, stop_words):
         data_queue_vk.put(None)
 
     process_thread.join()
-
-    show_data("VK", result_text_vk, text)
+    
 
 
 def tg_analyze(num_threads, num_telegram_messages, stop_words):
-    telegram_groups = entry_tg_groups.get().split(",")
-
+    telegram_groups = entry_tg_groups.get().split(", ")
+    for i in range(len(telegram_groups)):
+        if telegram_groups[i] == 'c/2070997529':
+            show_data(telegram_groups[i], result_text_telegram, choice("tg\\tg_215.json", "tg"), stop_words)
+        if telegram_groups[i] == 'c/4502351041':
+            show_data(telegram_groups[i], result_text_telegram, choice("tg\\tg_algs.json", "tg"), stop_words)
+        if telegram_groups[i] == 'c/2098343335/1':
+            show_data(telegram_groups[i], result_text_telegram, choice("tg\\tg_mainchat.json", "tg"), stop_words)
+        if telegram_groups[i] == 'piterach':
+            show_data(telegram_groups[i], result_text_telegram, choice("tg\\tg_piterach.json", "tg"), stop_words)
+        if telegram_groups[i] == 'spbu1724':
+            show_data(telegram_groups[i], result_text_telegram, choice("tg\\tg_spbu1724.json", "tg"), stop_words)
+        if telegram_groups[i] == 'moskvae':
+            show_data(telegram_groups[i], result_text_telegram, choice("tg\\tg_moskvae.json", "tg"), stop_words)
+        if telegram_groups[i] == 'sankt6':
+            show_data(telegram_groups[i], result_text_telegram, choice("tg\\tg_sankt6.json", "tg"), stop_words)
+        if telegram_groups[i] == 'tproger':
+            show_data(telegram_groups[i], result_text_telegram, choice("tg\\tg_tproger.json", "tg"), stop_words)
+        if telegram_groups[i] == 'vesti_spb':
+            show_data(telegram_groups[i], result_text_telegram, choice("tg\\tg_vesti_spb.json", "tg"), stop_words)
+        if telegram_groups[i] == 'vestiru24':
+            show_data(telegram_groups[i], result_text_telegram, choice("tg\\tg_vestiru24.json", "tg"), stop_words)
+            
     data_queue_telegram = Queue()
 
     preprocessed_data_telegram = []
@@ -172,8 +216,26 @@ def tg_analyze(num_threads, num_telegram_messages, stop_words):
         data_queue_telegram.put(None)
 
     process_thread.join()
+        
+def choice(path, flag):
+    if flag == 'tg':
+        text = extract_text_from_json(path)
+    if flag == 'vk':
+        fileObj = codecs.open(path, "r", "utf_8_sig" )
+        text_vk = fileObj.read()
+        fileObj.close()
 
-    show_data("TG", result_text_telegram, text_tg)
+        soup = BeautifulSoup(text_vk, features="lxml")
+
+        for script in soup(["script", "style"]):
+            script.extract()
+
+        text = soup.get_text(strip = " ")
+        lines = (line.strip() for line in text.splitlines())
+        chunks = (phrase.strip() for line in lines for phrase in line.split())
+        text = '\n'.join(chunk for chunk in chunks if chunk)
+
+    return(text)
 
 def extract_text_from_json(file_path):
   try:
@@ -198,6 +260,8 @@ def extract_text_from_json(file_path):
 
 
 def main():
+    result_text_vk.delete(1.0, tk.END)
+    result_text_telegram.delete(1.0, tk.END)
     num_threads = 1
     num_vk_posts = 40
     num_telegram_messages = 40
@@ -220,25 +284,9 @@ def main():
 
 
 if __name__ == "__main__":
-    file_path = 'tg.json'
-    text_tg = extract_text_from_json(file_path)
 
-    fileObj = codecs.open( "vk.html", "r", "utf_8_sig" )
-    text_vk = fileObj.read()
-    fileObj.close()
-
-    soup = BeautifulSoup(text_vk, features="lxml")
-
-    for script in soup(["script", "style"]):
-        script.extract()
-
-    text = soup.get_text(strip = " ")
-    lines = (line.strip() for line in text.splitlines())
-    chunks = (phrase.strip() for line in lines for phrase in line.split())
-    text = '\n'.join(chunk for chunk in chunks if chunk)
-
-    vk_groups = ["https://vk.com/spb1724"]
-    telegram_groups = ["https://t.me/c/2098343335/1"]
+    vk_groups = ["spb1724, proglib, lyandpy"]
+    telegram_groups = ["c/2098343335/1, spbu1724, piterach"]
 
     root = tk.Tk()
     root.title("VK and TG Analyzer")
