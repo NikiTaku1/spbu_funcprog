@@ -16,9 +16,9 @@ import tkinter as tk
 import time
 
 
-vk_key = "vk1.a.jJU7zuSG5TxqnMbU7Moh_ldq6IYJeFLok77WhQVyjuN0n_snqDgr1F6IFQEYW_i5lULanouuoaCP2NERYukFWqp5O-gpWavaFQSWy3Bfjct5F30uMuECv3tw9zRqYo3nGMFNo9woKYhOkGIY0LYNGF3ZuRPJPVKs7hDQ1m4sYT7ldGqgzc8BKe7L0hQqk_kGnsuZmie6hCFLZ0_-A-j0Qw"
-tg_id = "26322789"
-tg_hash = "b558f8ee4ff496e77df9caabd9f0a33b"
+vk_key = ""
+tg_id = ""
+tg_hash = ""
 
 vk_session = vk_api.VkApi(token=vk_key)
 vk_api_instance = vk_session.get_api()
